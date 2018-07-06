@@ -1,7 +1,7 @@
 const path = require('path');
 
 const browser = {
-    entry: path.resolve(__dirname, 'dist') + '/browser.js',
+    entry: path.resolve(__dirname, 'src') + '/browser.js',
     mode: 'production',
     module: {
         rules: [
