@@ -6,7 +6,8 @@
   "browser": "./src/browser.js",
   "files": [
     "dist",
-    "embark.min.js"
+    "embark.min.js",
+    "src"
   ],
   "scripts": {
     "build": "npm run clean && npm run build-babel && npm run build-webpack",
