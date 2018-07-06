@@ -15,6 +15,8 @@ EmbarkJS.isNewWeb3 = function (web3Obj) {
   return parseInt(_web3.version.api.split('.')[0], 10) >= 1;
 };
 
+EmbarkJS.checkWeb3 = function () {};
+
 EmbarkJS.Contract = function (options) {
   var self = this;
   var i, abiElement;
@@ -24,13 +26,16 @@ EmbarkJS.Contract = function (options) {
   this.address = options.address;
   this.gas = options.gas;
   this.code = '0x' + options.code;
+
   //this.web3 = options.web3 || web3;
   this.web3 = options.web3;
-  if (!this.web3 && typeof (web3) !== 'undefined') {
-    this.web3 = web3;
-  } else if (!this.web3) {
-    this.web3 = window.web3;
-  }
+
+  //if (!this.web3 && typeof (web3) !== 'undefined') {
+  //  this.web3 = web3;
+  //} else if (!this.web3) {
+  //  this.web3 = window.web3;
+  //}
+  EmbarkJS.checkWeb3.call(this);
 
   if (EmbarkJS.isNewWeb3(this.web3)) {
     ContractClass = new this.web3.eth.Contract(this.abi, this.address);
