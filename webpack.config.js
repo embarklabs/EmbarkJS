@@ -11,6 +11,7 @@ const browser = {
                 use: {
                     loader: 'babel-loader',
                     options: {
+                        babelrc: false,
                         presets: [
                             ['@babel/env']
                         ]
