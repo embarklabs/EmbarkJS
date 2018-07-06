@@ -1,0 +1,39 @@
+const path = require('path');
+
+const browser = {
+    entry: path.resolve(__dirname, 'src') + '/browser.js',
+    mode: 'production',
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: false,
+                        presets: [
+                            ['@babel/env']
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    // optimization: {
+    //     minimize: false
+    // },
+    output: {
+        filename: 'embark.min.js',
+        library: 'EmbarkJS',
+        libraryTarget: 'umd',
+        libraryExport: 'default',
+        path: __dirname,
+        umdNamedDefine: true,
+    },
+    target: 'web'
+};
+
+module.exports = [
+    browser
+];

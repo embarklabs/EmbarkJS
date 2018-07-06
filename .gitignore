@@ -1,0 +1,13 @@
+dist
+node_modules
+package
+
+.idea
+.vscode
+.eslintrc.json
+
+embark.min.js
+embarkjs-*.tgz
+TODO
+NOTES
+npm-debug.log

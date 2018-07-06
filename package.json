@@ -1,0 +1,56 @@
+{
+  "name": "embarkjs",
+  "version": "0.1.0",
+  "description": "JavaScript library for easily interacting with web3 technologies",
+  "main": "./dist/index.js",
+  "browser": "./src/browser.js",
+  "files": [
+    "dist",
+    "embark.min.js",
+    "src"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run build-babel && npm run build-webpack",
+    "build-babel": "babel --ignore 'src/browser.js' --out-dir dist src",
+    "build-webpack": "npm run webpack",
+    "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
+    "prepack": "npm run build",
+    "server": "http-server",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/embark-framework/EmbarkJS.git"
+  },
+  "author": "Iuri Matias <iuri.matias@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "ethereum",
+    "dapps",
+    "ipfs",
+    "solidity",
+    "solc",
+    "blockchain",
+    "serverless"
+  ],
+  "bugs": {
+    "url": "https://github.com/embark-framework/EmbarkJS/issues"
+  },
+  "homepage": "https://github.com/embark-framework/EmbarkJS#readme",
+  "dependencies": {
+    "@babel/runtime": "7.0.0-beta.52"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.0.0-beta.52",
+    "@babel/core": "7.0.0-beta.52",
+    "@babel/plugin-transform-runtime": "7.0.0-beta.52",
+    "@babel/preset-env": "7.0.0-beta.52",
+    "ajv": "6.5.2",
+    "babel-loader": "8.0.0-beta.4",
+    "http-server": "0.11.1",
+    "rimraf": "2.6.2",
+    "webpack": "4.15.1",
+    "webpack-cli": "3.0.8"
+  }
+}

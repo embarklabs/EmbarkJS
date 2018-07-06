@@ -1,0 +1,9 @@
+{
+  "compact": false,
+  "presets": [
+    ["@babel/env", {"targets": {"node": "8.11.3"}}]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime"
+  ]
+}
