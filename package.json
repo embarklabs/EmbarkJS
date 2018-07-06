@@ -24,6 +24,15 @@
   },
   "author": "Iuri Matias <iuri.matias@gmail.com>",
   "license": "MIT",
+  "keywords": [
+    "ethereum",
+    "dapps",
+    "ipfs",
+    "solidity",
+    "solc",
+    "blockchain",
+    "serverless"
+  ],
   "bugs": {
     "url": "https://github.com/embark-framework/EmbarkJS/issues"
   },
