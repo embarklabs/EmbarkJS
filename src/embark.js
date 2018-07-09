@@ -388,7 +388,7 @@ EmbarkJS.Names.register = function(name, options) {
     throw new Error('Name system provider not set; e.g EmbarkJS.Names.setProvider("ens")');
   }
   return this.currentNameSystems.register(name, options);
-}
+};
 
 EmbarkJS.Utils = {
   fromAscii: function (str) {
