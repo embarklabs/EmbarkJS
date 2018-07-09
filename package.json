@@ -10,12 +10,11 @@
     "src"
   ],
   "scripts": {
-    "build": "npm run clean && npm run build-babel && npm run build-webpack",
-    "build-babel": "babel --ignore 'src/browser.js' --out-dir dist src",
-    "build-webpack": "npm run webpack",
+    "babel": "babel --out-dir dist src",
+    "build": "npm run clean && npm run babel && npm run webpack",
     "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
+    "http-server": "http-server",
     "prepare": "npm run build",
-    "server": "http-server",
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack"
   },

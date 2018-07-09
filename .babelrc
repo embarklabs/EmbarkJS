@@ -1,9 +1,11 @@
 {
+  "comments": false,
   "compact": false,
-  "presets": [
-    ["@babel/env", {"targets": {"node": "8.11.3"}}]
-  ],
+  "ignore": ["src/browser.js"],
   "plugins": [
     "@babel/plugin-transform-runtime"
+  ],
+  "presets": [
+    ["@babel/env", {"targets": {"node": "8.11.3"}}]
   ]
 }
