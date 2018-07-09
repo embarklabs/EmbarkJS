@@ -1,6 +1,6 @@
 const path = require('path');
 
-const browser = {
+const standalone = {
     entry: path.resolve(__dirname, 'src') + '/browser.js',
     mode: 'production',
     module: {
@@ -25,6 +25,7 @@ const browser = {
     // },
     output: {
         filename: 'embark.min.js',
+        globalObject: 'typeof self !== \'undefined\' ? self : this',
         library: 'EmbarkJS',
         libraryTarget: 'umd',
         libraryExport: 'default',
@@ -35,5 +36,5 @@ const browser = {
 };
 
 module.exports = [
-    browser
+    standalone
 ];
