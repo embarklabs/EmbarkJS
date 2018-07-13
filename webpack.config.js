@@ -12,6 +12,9 @@ const standalone = {
                     loader: 'babel-loader',
                     options: {
                         babelrc: false,
+                        plugins: [
+                            "@babel/plugin-transform-runtime"
+                        ],
                         presets: [
                             ['@babel/env']
                         ]
