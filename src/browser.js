@@ -1,9 +1,11 @@
-import _EmbarkJS from './embark';
+import _EmbarkJS from './index';
 
 var EmbarkJS = Object.assign({}, _EmbarkJS);
 
+var _checkWeb3 = EmbarkJS.Contract.checkWeb3;
+
 EmbarkJS.Contract.checkWeb3 = function () {
-    _EmbarkJS.Contract.checkWeb3.call(this);
+    _checkWeb3.call(this);
     if (!this.web3 && typeof (web3) !== 'undefined') {
         this.web3 = web3;
     } else if (!this.web3) {
