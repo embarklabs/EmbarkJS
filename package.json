@@ -6,6 +6,11 @@
   "browser": {
     "./dist/node/index.js": "./dist/browser/browser.js"
   },
+  "browserslist": [
+    "last 1 version",
+    "not dead",
+    "> 0.2%"
+  ],
   "files": [
     "dist",
     "embark.min.js",
@@ -56,5 +61,8 @@
     "rimraf": "2.6.2",
     "webpack": "4.16.1",
     "webpack-cli": "3.0.8"
+  },
+  "engines": {
+    "node" : ">=8.11.3"
   }
 }
