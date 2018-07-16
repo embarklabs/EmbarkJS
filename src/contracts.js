@@ -1,12 +1,3 @@
-
-let isNewWeb3 = function (web3Obj) {
-  var _web3 = web3Obj || (new Web3());
-  if (typeof(_web3.version) === "string") {
-    return true;
-  }
-  return parseInt(_web3.version.api.split('.')[0], 10) >= 1;
-};
-
 let Contract = function (options) {
   var self = this;
   var i, abiElement;
@@ -17,12 +8,11 @@ let Contract = function (options) {
   this.gas = options.gas;
   this.code = '0x' + options.code;
 
-  //this.web3 = options.web3 || web3;
   this.web3 = options.web3;
 
-  this.checkWeb3.call(this);
+  Contract.checkWeb3.call(this);
 
-  if (isNewWeb3(this.web3)) {
+  if (Contract.isNewWeb3(this.web3)) {
     ContractClass = new this.web3.eth.Contract(this.abi, this.address);
     ContractClass.setProvider(this.web3.currentProvider);
     ContractClass.options.data = this.code;
@@ -176,6 +166,14 @@ let Contract = function (options) {
 };
 
 Contract.checkWeb3 = function () {};
+
+Contract.isNewWeb3 = function (web3Obj) {
+    var _web3 = web3Obj || (new Web3());
+    if (typeof(_web3.version) === "string") {
+        return true;
+    }
+    return parseInt(_web3.version.api.split('.')[0], 10) >= 1;
+};
 
 Contract.prototype.deploy = function (args, _options) {
   var self = this;
