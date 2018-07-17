@@ -34,6 +34,13 @@ Names.lookup = function (identifier) {
   return this.currentNameSystems.lookup(identifier);
 };
 
+Names.isAvailable = function () {
+    return this.currentNameSystems.isAvailable();
+};
+
+// To Implement
+
+
 // register a name
 Names.register = function(name, options) {
   if (!this.currentNameSystems) {
