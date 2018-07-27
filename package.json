@@ -21,7 +21,7 @@
     "babel:browser": "cross-env BABEL_ENV=browser babel --out-dir dist/browser src",
     "babel:node": "cross-env BABEL_ENV=node babel --out-dir dist src",
     "build": "npm run clean && npm run babel && npm run webpack",
-    "clean": "cross-env rimraf dist embark.min.js embarkjs-*.tgz package",
+    "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
     "http-server": "http-server",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
