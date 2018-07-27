@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "babel": "npm run babel:browser && npm run babel:node",
-    "babel:browser": "BABEL_ENV=browser babel --out-dir dist/browser src",
-    "babel:node": "BABEL_ENV=node babel --out-dir dist src",
+    "babel:browser": "cross-env BABEL_ENV=browser babel --out-dir dist/browser src",
+    "babel:node": "cross-env BABEL_ENV=node babel --out-dir dist src",
     "build": "npm run clean && npm run babel && npm run webpack",
     "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
     "http-server": "http-server",
@@ -57,6 +57,7 @@
     "@babel/preset-env": "7.0.0-beta.54",
     "ajv": "6.5.2",
     "babel-loader": "8.0.0-beta.4",
+    "cross-env": "5.2.0",
     "http-server": "0.11.1",
     "rimraf": "2.6.2",
     "webpack": "4.16.1",

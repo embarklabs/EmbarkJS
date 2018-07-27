@@ -1,6 +1,7 @@
 let Names = {};
 
 Names.Providers = {};
+Names.noProviderError = 'Name system provider not set; e.g EmbarkJS.Names.setProvider("ens")';
 
 Names.registerProvider = function (providerName, obj) {
   Names.Providers[providerName] = obj;
@@ -19,34 +20,30 @@ Names.setProvider = function (provider, options) {
 };
 
 // resolve resolves a name into an identifier of some kind
-Names.resolve = function (name) {
+Names.resolve = function (name, callback) {
   if (!this.currentNameSystems) {
-    throw new Error('Name system provider not set; e.g EmbarkJS.Names.setProvider("ens")');
+    throw new Error(this.noProviderError);
   }
-  return this.currentNameSystems.resolve(name);
+  return this.currentNameSystems.resolve(name, callback);
 };
 
 // the reverse of resolve, resolves using an identifier to get to a name
-Names.lookup = function (identifier) {
+Names.lookup = function (identifier, callback) {
   if (!this.currentNameSystems) {
-    throw new Error('Name system provider not set; e.g EmbarkJS.Names.setProvider("ens")');
+    throw new Error(this.noProviderError);
   }
-  return this.currentNameSystems.lookup(identifier);
+  return this.currentNameSystems.lookup(identifier, callback);
 };
 
 Names.isAvailable = function () {
     return this.currentNameSystems.isAvailable();
 };
 
-// To Implement
-
-
-// register a name
-Names.register = function(name, options) {
+Names.registerSubDomain = function(name, address, callback) {
   if (!this.currentNameSystems) {
-    throw new Error('Name system provider not set; e.g EmbarkJS.Names.setProvider("ens")');
+    throw new Error(this.noProviderError);
   }
-  return this.currentNameSystems.register(name, options);
+  return this.currentNameSystems.registerSubDomain(name, address, callback);
 };
 
 export default Names;
