@@ -8,6 +8,12 @@
         "src/node/index.js",
         "src/standalone/index.js"
       ],
+      "plugins": [
+        ["@babel/plugin-transform-runtime", {
+          "corejs": 2,
+          "useESModules": true
+        }]
+      ],
       "presets": [
         ["@babel/env", {
           "modules": false,
@@ -17,14 +23,16 @@
     },
     "node": {
       "ignore": ["src/browser.js"],
+      "plugins": [
+        ["@babel/plugin-transform-runtime", {
+          "corejs": 2
+        }]
+      ],
       "presets": [
         ["@babel/env", {
           "targets": {"node": "8.11.3"}
         }]
       ]
     }
-  },
-  "plugins": [
-    "@babel/plugin-transform-runtime"
-  ]
+  }
 }
