@@ -33,17 +33,22 @@ let Utils = {
 
       // This interval is there to compensate for the event that sometimes doesn't get triggered when using WebSocket
       // FIXME The issue somehow only happens when the blockchain node is started in the same terminal
-      const interval = setInterval(() => {
-        if (!hash) {
-          return; // Wait until we receive the hash
-        }
-        web3.eth.getTransactionReceipt(hash, (err, receipt) => {
-          if (!err && !receipt) {
-            return; // Transaction is not yet complete
+      // Only poll with a Websocket provider
+      if (web3.currentProvider.constructor.name === 'WebsocketProvider') {
+        var interval = setInterval(function () {
+          if (!hash) {
+            return;
           }
-          callback(err, receipt);
-        });
-      }, 100);
+
+          web3.eth.getTransactionReceipt(hash, function (err, receipt) {
+            if (!err && !receipt) {
+              return;
+            }
+
+            callback(err, receipt);
+          });
+        }, 100);
+      }
 
       toSend.estimateGas()
         .then(gasEstimated => {
