@@ -3,33 +3,48 @@ import {detectSeries} from 'async';
 const Storage = {};
 
 Storage.Providers = {};
+Storage.noProviderError = 'Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")';
 
 Storage.saveText = function (text) {
   if (!this.currentStorage) {
-    throw new Error('Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")');
+    throw new Error(this.noProviderError);
   }
   return this.currentStorage.saveText(text);
 };
 
 Storage.get = function (hash) {
   if (!this.currentStorage) {
-    throw new Error('Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")');
+    throw new Error(this.noProviderError);
   }
   return this.currentStorage.get(hash);
 };
 
 Storage.uploadFile = function (inputSelector) {
   if (!this.currentStorage) {
-    throw new Error('Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")');
+    throw new Error(this.noProviderError);
   }
   return this.currentStorage.uploadFile(inputSelector);
 };
 
 Storage.getUrl = function (hash) {
   if (!this.currentStorage) {
-    throw new Error('Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")');
+    throw new Error(this.noProviderError);
   }
   return this.currentStorage.getUrl(hash);
+};
+
+Storage.resolve = function (name, callback) {
+  if (!this.currentStorage) {
+    throw new Error(this.noProviderError);
+  }
+  return this.currentStorage.resolve(name, callback);
+};
+
+Storage.register = function (addr, callback) {
+  if (!this.currentStorage) {
+    throw new Error(this.noProviderError);
+  }
+  return this.currentStorage.register(addr, callback);
 };
 
 Storage.registerProvider = function (providerName, obj) {
@@ -50,7 +65,7 @@ Storage.setProvider = function (provider, options) {
 
 Storage.isAvailable = function () {
   if (!this.currentStorage) {
-    throw new Error('Storage provider not set; e.g EmbarkJS.Storage.setProvider("ipfs")');
+    throw new Error(this.noProviderError);
   }
   return this.currentStorage.isAvailable();
 };

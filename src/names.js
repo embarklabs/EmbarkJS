@@ -46,11 +46,4 @@ Names.registerSubDomain = function(name, address, callback) {
   return this.currentNameSystems.registerSubDomain(name, address, callback);
 };
 
-Names.register = function(name, callback) {
-  if (!this.currentNameSystems) {
-    throw new Error(this.noProviderError);
-  }
-  return this.currentNameSystems.register(name, callback);
-};
-
 export default Names;
