@@ -6,16 +6,17 @@ Messages.registerProvider = function (providerName, obj) {
   this.Providers[providerName] = obj;
 };
 
-Messages.setProvider = function (provider, options) {
-  let providerObj = this.Providers[provider];
+Messages.setProvider = function (providerName, options) {
+  let provider = this.Providers[providerName];
 
-  if (!providerObj) {
+  if (!provider) {
     throw new Error('Unknown messages provider');
   }
 
-  this.currentMessages = providerObj;
+  this.currentMessagesName = providerName;
+  this.currentMessages = provider;
 
-  return providerObj.setProvider(options);
+  return provider.setProvider(options);
 };
 
 Messages.isAvailable = function () {

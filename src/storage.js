@@ -51,16 +51,17 @@ Storage.registerProvider = function (providerName, obj) {
   this.Providers[providerName] = obj;
 };
 
-Storage.setProvider = function (provider, options) {
-  let providerObj = this.Providers[provider];
+Storage.setProvider = function (providerName, options) {
+  let provider = this.Providers[providerName];
 
-  if (!providerObj) {
+  if (!provider) {
     throw new Error('Unknown storage provider');
   }
 
-  this.currentStorage = providerObj;
+  this.currentStorageName = providerName;
+  this.currentStorage = provider;
 
-  return providerObj.setProvider(options);
+  return provider.setProvider(options);
 };
 
 Storage.isAvailable = function () {

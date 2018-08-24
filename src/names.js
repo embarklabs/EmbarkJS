@@ -7,16 +7,17 @@ Names.registerProvider = function (providerName, obj) {
   Names.Providers[providerName] = obj;
 };
 
-Names.setProvider = function (provider, options) {
-  let providerObj = this.Providers[provider];
+Names.setProvider = function (providerName, options) {
+  let provider = this.Providers[providerName];
 
-  if (!providerObj) {
+  if (!provider) {
     throw new Error('Unknown name system provider');
   }
 
-  this.currentNameSystems = providerObj;
+  this.currentNameSystemsName = providerName;
+  this.currentNameSystems = provider;
 
-  return providerObj.setProvider(options);
+  return provider.setProvider(options);
 };
 
 // resolve resolves a name into an identifier of some kind
