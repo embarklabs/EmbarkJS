@@ -13,7 +13,7 @@ Messages.setProvider = function (providerName, options) {
     throw new Error('Unknown messages provider');
   }
 
-  this.currentMessagesName = providerName;
+  this.currentProviderName = providerName;
   this.currentMessages = provider;
 
   return provider.setProvider(options);

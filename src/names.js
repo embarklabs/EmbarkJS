@@ -14,7 +14,7 @@ Names.setProvider = function (providerName, options) {
     throw new Error('Unknown name system provider');
   }
 
-  this.currentNameSystemsName = providerName;
+  this.currentProviderName = providerName;
   this.currentNameSystems = provider;
 
   return provider.setProvider(options);

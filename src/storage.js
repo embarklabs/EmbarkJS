@@ -58,7 +58,7 @@ Storage.setProvider = function (providerName, options) {
     throw new Error('Unknown storage provider');
   }
 
-  this.currentStorageName = providerName;
+  this.currentProviderName = providerName;
   this.currentStorage = provider;
 
   return provider.setProvider(options);
