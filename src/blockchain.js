@@ -1,5 +1,5 @@
 
-function __reduce(arr, memo, iteratee, cb) {
+function reduce(arr, memo, iteratee, cb) {
   if (typeof cb !== 'function') {
     if (typeof memo === 'function' && typeof iteratee === 'function') {
       cb = iteratee;
@@ -36,12 +36,12 @@ function __reduce(arr, memo, iteratee, cb) {
   })(0, memo);
 };
 
-function __isNewWeb3_1() {
+function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
 };
 
-function __getAccounts(cb) {
-  if (__isNewWeb3_1()) {
+function getAccounts(cb) {
+  if (isNewWeb3_1()) {
     web3.eth.getAccounts().then(function(accounts) {
       cb(null, accounts);
       return null;
@@ -60,8 +60,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
   this.web3 = null;
   this.doFirst(function(cb) {
-    console.dir("connecting...");
-    __reduce(connectionList, function(prev, value, next) {
+    reduce(connectionList, function(prev, value, next) {
       if (prev === false) {
         return next(null, false);
       }
@@ -78,7 +77,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         return next(null, '');
       }
 
-      __getAccounts(function(err, account) {
+      getAccounts(function(err, account) {
         if (err) {
           next(null, true)
         } else {
@@ -87,7 +86,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
       });
     }, function(err, _result) {
       self.web3 = web3;
-      __getAccounts(function(err, accounts) {
+      getAccounts(function(err, accounts) {
         if (opts.warnAboutMetamask) {
           if (web3.eth.currentProvider && web3.eth.currentProvider.isMetaMask) {
             console.log("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
@@ -96,7 +95,6 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         if (accounts) {
           web3.eth.defaultAccount = accounts[0];
         }
-        console.dir("connected");
         cb();
         doneCb(err);
       });
@@ -105,7 +103,6 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
 }
 
 Blockchain.execWhenReady = function(cb) {
-  console.dir("adding an Blockchain: execWhenReady");
   if (this.done) {
     return cb(this.err);
   }
@@ -126,7 +123,6 @@ Blockchain.doFirst = function(todo) {
     if (self.finalCb) {
       self.finalCb.apply(self.finalCb, []);
     }
-    console.dir("all done!");
   })
 }
 
@@ -156,10 +152,9 @@ let Contract = function (options) {
     let originalMethods = Object.keys(ContractClass);
 
     Blockchain.execWhenReady(function() {
-      console.dir("executing...");
       ContractClass.setProvider(web3.currentProvider);
       ContractClass.options.from = web3.eth.defaultAccount;
-    }, "Contract");
+    });
 
     ContractClass._jsonInterface.forEach((abi) => {
       if (originalMethods.indexOf(abi.name) >= 0) {
