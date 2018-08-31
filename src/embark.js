@@ -1,2 +1,1 @@
-import EmbarkJS from './index';
-export default EmbarkJS;
+export {default} from './index';
