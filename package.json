@@ -48,7 +48,8 @@
   "homepage": "https://github.com/embark-framework/EmbarkJS#readme",
   "dependencies": {
     "@babel/runtime-corejs2": "7.0.0-rc.1",
-    "async": "^2.0.1"
+    "async": "2.6.1",
+    "async-es": "2.6.1"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0-rc.1",
