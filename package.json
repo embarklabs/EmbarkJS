@@ -17,9 +17,10 @@
     "src"
   ],
   "scripts": {
-    "babel": "npm run babel:browser && npm run babel:node",
+    "babel": "npm run babel:browser && npm run babel:node && npm run babel:node:async",
     "babel:browser": "cross-env BABEL_ENV=browser babel --out-dir dist/browser src",
     "babel:node": "cross-env BABEL_ENV=node babel --out-dir dist src",
+    "babel:node:async": "cross-env BABEL_ENV=node:async babel --out-dir dist src/node",
     "build": "npm run clean && npm run babel && npm run webpack",
     "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
     "http-server": "http-server",

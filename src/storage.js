@@ -1,4 +1,4 @@
-import {detectSeries} from 'async';
+import {detectSeries} from './async';
 
 const Storage = {};
 

@@ -1,4 +1,4 @@
-import {reduce} from 'async'
+import {reduce} from './async'
 
 function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
