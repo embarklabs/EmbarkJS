@@ -21,7 +21,7 @@ EmbarkJS.Names = Names;
 EmbarkJS.Messages = Messages;
 EmbarkJS.Utils = Utils;
 EmbarkJS.Contract = function() {
-  console.error("deprecated: please use EmbarkJS.Blockchain.Contract instead");
+  throw new Error('EmbarkJS.Contract is deprecated: please use EmbarkJS.Blockchain.Contract instead');
 };
 
 EmbarkJS.isNewWeb3 = Blockchain.Contract.isNewWeb3;

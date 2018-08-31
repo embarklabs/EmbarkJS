@@ -1,40 +1,4 @@
-
-function reduce(arr, memo, iteratee, cb) {
-  if (typeof cb !== 'function') {
-    if (typeof memo === 'function' && typeof iteratee === 'function') {
-      cb = iteratee;
-      iteratee = memo;
-      memo = [];
-    } else {
-      throw new TypeError('expected callback to be a function');
-    }
-  }
-
-  if (!Array.isArray(arr)) {
-    cb(new TypeError('expected an array'));
-    return;
-  }
-
-  if (typeof iteratee !== 'function') {
-    cb(new TypeError('expected iteratee to be a function'));
-    return;
-  }
-
-  (function next(i, acc) {
-    if (i === arr.length) {
-      cb(null, acc);
-      return;
-    }
-
-    iteratee(acc, arr[i], function(err, val) {
-      if (err) {
-        cb(err);
-        return;
-      }
-      next(i + 1, val);
-    });
-  })(0, memo);
-};
+import {reduce} from 'async'
 
 function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
@@ -42,14 +6,11 @@ function isNewWeb3_1() {
 
 function getAccounts(cb) {
   if (isNewWeb3_1()) {
-    web3.eth.getAccounts().then(function(accounts) {
-      cb(null, accounts);
-      return null;
+    return web3.eth.getAccounts().then(function(accounts) {
+      return cb(null, accounts);
     }).catch(function(err) {
-      cb(err);
-      return null;
+      return cb(err);
     });
-    return;
   }
   web3.eth.getAccounts(cb);
 };
@@ -60,7 +21,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
   this.web3 = null;
   this.doFirst(function(cb) {
-    reduce(connectionList, function(prev, value, next) {
+    reduce(connectionList, '', function(prev, value, next) {
       if (prev === false) {
         return next(null, false);
       }
@@ -78,11 +39,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
       }
 
       getAccounts(function(err, account) {
-        if (err) {
-          next(null, true)
-        } else {
-          next(null, false)
-        }
+        return next(null, !!err)
       });
     }, function(err, _result) {
       self.web3 = web3;
