@@ -46,7 +46,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
       getAccounts(function(err, accounts) {
         if (opts.warnAboutMetamask) {
           if (web3.eth.currentProvider && web3.eth.currentProvider.isMetaMask) {
-            console.log("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
+            console.warn("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
           }
         }
         if (accounts) {
