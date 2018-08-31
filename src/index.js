@@ -1,8 +1,8 @@
-import Storage from './storage.js';
-import Names from './names.js';
-import Messages from './messages.js';
-import Blockchain from './blockchain.js';
-import Utils from './utils.js';
+import Storage from './storage';
+import Names from './names';
+import Messages from './messages';
+import Blockchain from './blockchain';
+import Utils from './utils';
 
 var EmbarkJS = {
   onReady: function (cb) {
