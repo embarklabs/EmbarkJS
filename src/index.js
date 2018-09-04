@@ -6,7 +6,7 @@ import Utils from './utils.js';
 
 var EmbarkJS = {
   onReady: function (cb) {
-    if (self.Blockchain.done) {
+    if (this.Blockchain.done) {
       return cb();
     }
     this.Blockchain.finalCb = function() {
