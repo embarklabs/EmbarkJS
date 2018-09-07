@@ -108,7 +108,9 @@ let Contract = function (options) {
     let originalMethods = Object.keys(ContractClass);
 
     Blockchain.execWhenReady(function() {
-      ContractClass.setProvider(web3.currentProvider);
+      if(!ContractClass.currentProvider){
+        ContractClass.setProvider(web3.currentProvider);
+      }
       ContractClass.options.from = web3.eth.defaultAccount;
     });
 
