@@ -99,7 +99,6 @@ let Contract = function (options) {
 
   if (Contract.isNewWeb3(this.web3)) {
     ContractClass = new this.web3.eth.Contract(this.abi, this.address);
-    ContractClass.setProvider(this.web3.currentProvider);
     ContractClass.options.data = this.code;
     ContractClass.options.from = this.from || this.web3.eth.defaultAccount;
     ContractClass.abi = ContractClass.options.abi;
@@ -109,7 +108,9 @@ let Contract = function (options) {
     let originalMethods = Object.keys(ContractClass);
 
     Blockchain.execWhenReady(function() {
-      ContractClass.setProvider(web3.currentProvider);
+      if(!ContractClass.currentProvider){
+        ContractClass.setProvider(web3.currentProvider);
+      }
       ContractClass.options.from = web3.eth.defaultAccount;
     });
 
