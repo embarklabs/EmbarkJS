@@ -47,8 +47,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
     });
     window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
 
-    const infiniteWaitBreaker = setInterval(() => {
-      clearInterval(infiniteWaitBreaker);
+    setTimeout(() => {
       if (exited) {
         return;
       }
