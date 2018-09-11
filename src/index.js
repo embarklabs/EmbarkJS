@@ -6,10 +6,7 @@ import Utils from './utils';
 
 var EmbarkJS = {
   onReady: function (cb) {
-    Blockchain.execWhenReady(cb)
-    Blockchain.finalCb = function() {
-      cb();
-    }
+    Blockchain.execWhenReady(cb);
   }
 };
 
