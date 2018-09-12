@@ -1,5 +1,7 @@
 import {reduce} from './async'
 
+let Blockchain = {};
+
 function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
 };
@@ -15,33 +17,74 @@ function getAccounts(cb) {
   web3.eth.getAccounts(cb);
 };
 
-let Blockchain = {};
-
 Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
-  this.web3 = null;
+
+  const checkConnect = (next) => {
+    getAccounts(function(err, a) {
+      if (err) {
+        web3.setProvider(null);
+      }
+      return next(null, !err)
+    });
+  }
+
+  const connectWeb3 = (next) => {
+    let exited = false;
+    if (web3.givenProvider) {
+      web3.setProvider(web3.givenProvider);
+      return checkConnect(next);
+    }
+    window.addEventListener('message', ({ data } = msg) => {
+      if (data && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
+        if(exited) {
+          return console.warn("%cNote: The application might be in a corrupted state, please reload the page", "font-size: 2em");
+        }
+        exited = true;
+        web3.setProvider(ethereum);
+        checkConnect(next);
+      }
+    });
+    window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
+
+    setTimeout(() => {
+      if (exited) {
+        return;
+      }
+
+      exited = true;
+      next(null, false);
+    }, 20000);
+  }
+
+  const connectWebsocket = (value, next) => {
+    web3.setProvider(new Web3.providers.WebsocketProvider(value));
+    checkConnect(next);
+  }
+
+  const connectHttp = (value, next) => {
+    web3.setProvider(new Web3.providers.HttpProvider(value));
+    checkConnect(next);
+  }
+
   this.doFirst(function(cb) {
-    reduce(connectionList, '', function(prev, value, next) {
-      if (prev === false) {
+    reduce(connectionList, false, function(connected, value, next) {
+      if (connected) {
+        return next(null, connected);
+      }
+
+      if (typeof Web3 === 'undefined' || typeof web3 === 'undefined') {
         return next(null, false);
       }
 
-      if (value === '$WEB3' && (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined')) {
-        web3.setProvider(web3.givenProvider);
-      } else if (value !== '$WEB3' && (typeof Web3 !== 'undefined' && ((typeof web3 === 'undefined') || (typeof web3 !== 'undefined' && (!web3.isConnected || (web3.isConnected && !web3.isConnected())))))) {
-        if (value.indexOf('ws://') >= 0) {
-          web3.setProvider(new Web3.providers.WebsocketProvider(value));
-        } else {
-          web3.setProvider(new Web3.providers.HttpProvider(value));
-        }
-      } else if (value === '$WEB3') {
-        return next(null, '');
+      if (value === '$WEB3') {
+        connectWeb3(next);
+      } else if (value.indexOf('ws://') >= 0) {
+        connectWebsocket(value, next)
+      } else {
+        connectHttp(value, next)
       }
-
-      getAccounts(function(err, account) {
-        return next(null, !!err)
-      });
-    }, function(err, _result) {
+    }, function(err, _connected) {
       self.web3 = web3;
       getAccounts(function(err, accounts) {
         if (opts.warnAboutMetamask) {
