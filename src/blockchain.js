@@ -4,7 +4,7 @@ let Blockchain = {};
 
 function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
-};
+}
 
 function getAccounts(cb) {
   if (isNewWeb3_1()) {
@@ -15,7 +15,7 @@ function getAccounts(cb) {
     });
   }
   web3.eth.getAccounts(cb);
-};
+}
 
 Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
@@ -95,12 +95,12 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         if (accounts) {
           web3.eth.defaultAccount = accounts[0];
         }
-        cb();
+        cb(err);
         doneCb(err);
       });
     });
   })
-}
+};
 
 Blockchain.execWhenReady = function(cb) {
   if (this.done) {
@@ -110,7 +110,7 @@ Blockchain.execWhenReady = function(cb) {
     this.list = [];
   }
   this.list.push(cb)
-}
+};
 
 Blockchain.doFirst = function(todo) {
   var self = this;
@@ -120,11 +120,8 @@ Blockchain.doFirst = function(todo) {
     if (self.list) {
       self.list.map((x) => x.apply(x, [self.err]));
     }
-    if (self.finalCb) {
-      self.finalCb.apply(self.finalCb, []);
-    }
   })
-}
+};
 
 let Contract = function (options) {
   var self = this;

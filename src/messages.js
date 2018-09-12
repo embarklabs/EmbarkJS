@@ -20,6 +20,9 @@ Messages.setProvider = function (providerName, options) {
 };
 
 Messages.isAvailable = function () {
+  if (!this.currentMessages) {
+    return false;
+  }
   return this.currentMessages.isAvailable();
 };
 
