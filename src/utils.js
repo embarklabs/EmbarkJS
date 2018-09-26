@@ -50,9 +50,9 @@ let Utils = {
         }, 100);
       }
 
-      toSend.estimateGas()
-        .then(gasEstimated => {
-          params.gas = gasEstimated + 1000;
+      //toSend.estimateGas()
+      //  .then(gasEstimated => {
+          //params.gas = gasEstimated + 1000;
           return toSend.send(params, function(err, transactionHash) {
             if (err) {
               return callback(err);
@@ -68,7 +68,7 @@ let Utils = {
             }
             web3.eth.getTransactionReceipt(hash, callback);
           }).catch(callback);
-        });
+        //});
     });
   }
 };
