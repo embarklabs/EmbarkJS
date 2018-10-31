@@ -29,32 +29,18 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
     });
   }
 
-  const connectWeb3 = (next) => {
-    let exited = false;
-    if (web3.givenProvider) {
-      web3.setProvider(web3.givenProvider);
-      return checkConnect(next);
-    }
-    window.addEventListener('message', ({ data } = msg) => {
-      if (data && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
-        if(exited) {
-          return console.warn("%cNote: The application might be in a corrupted state, please reload the page", "font-size: 2em");
-        }
-        exited = true;
+  const connectWeb3 = async (next) => {
+    if (ethereum) {
+      try {
+        await ethereum.enable();
         web3.setProvider(ethereum);
-        checkConnect(next);
+        return checkConnect(next);
+      } catch (error) {
+        return next(null, false);
       }
-    });
-    window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
+    }
 
-    setTimeout(() => {
-      if (exited) {
-        return;
-      }
-
-      exited = true;
-      next(null, false);
-    }, 20000);
+    return next(null, false);
   }
 
   const connectWebsocket = (value, next) => {
