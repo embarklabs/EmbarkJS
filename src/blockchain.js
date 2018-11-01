@@ -30,7 +30,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   }
 
   const connectWeb3 = async (next) => {
-    if (ethereum) {
+    if (window.ethereum) {
       try {
         await ethereum.enable();
         web3.setProvider(ethereum);
