@@ -1,6 +1,7 @@
 import {reduce} from './async'
 
 let Blockchain = {};
+let contracts = [];
 
 function isNewWeb3_1() {
   return (typeof(web3.version) === "string");
@@ -32,7 +33,9 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   const connectWeb3 = async (next) => {
     if (window.ethereum) {
       try {
-        await ethereum.enable();
+        if (Blockchain.autoEnable) {
+          await ethereum.enable();
+        }
         web3.setProvider(ethereum);
         return checkConnect(next);
       } catch (error) {
@@ -88,6 +91,19 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   })
 };
 
+Blockchain.enableEthereum = function() {
+  if (window.ethereum) {
+    return ethereum.enable().then((accounts) => {
+      web3.setProvider(ethereum);
+      web3.eth.defaultAccount = accounts[0];
+      contracts.forEach(contract => {
+        contract.options.from = web3.eth.defaultAccount;
+      })
+      return accounts;
+    });
+  }
+};
+
 Blockchain.execWhenReady = function(cb) {
   if (this.done) {
     return cb(this.err);
@@ -125,8 +141,12 @@ let Contract = function (options) {
 
   if (Contract.isNewWeb3(this.web3)) {
     ContractClass = new this.web3.eth.Contract(this.abi, this.address);
+    contracts.push(ContractClass);
     ContractClass.options.data = this.code;
-    ContractClass.options.from = this.from || this.web3.eth.defaultAccount;
+    const from = this.from || this.web3.eth.defaultAccount
+    if (from) {
+      ContractClass.options.from = from
+    }
     ContractClass.abi = ContractClass.options.abi;
     ContractClass.address = this.address;
     ContractClass.gas = this.gas;
@@ -137,7 +157,9 @@ let Contract = function (options) {
       if(!ContractClass.currentProvider){
         ContractClass.setProvider(web3.currentProvider);
       }
-      ContractClass.options.from = web3.eth.defaultAccount;
+      if (web3.eth.defaultAccount) {
+        ContractClass.options.from = web3.eth.defaultAccount;
+      }
     });
 
     ContractClass._jsonInterface.forEach((abi) => {
