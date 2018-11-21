@@ -7,8 +7,9 @@ let Utils = {
     var _web3 = new Web3();
     return _web3.utils.toAscii(str);
   },
-  secureSend: function(web3, toSend, params, isContractDeploy, cb) {
+  secureSend: function(web3, toSend, params, isContractDeploy, cb, hashCb) {
     cb = cb || function() {};
+    hashCb = hashCb || function () {};
     return new Promise((resolve, reject) => {
       let hash;
       let calledBacked = false;
@@ -58,7 +59,9 @@ let Utils = {
               return callback(err);
             }
             hash = transactionHash;
-          }).on('receipt', function(receipt) {
+            hashCb(hash);
+          })
+          .on('receipt', function(receipt) {
             if (!isContractDeploy || receipt.contractAddress) {
               callback(null, receipt);
             }
