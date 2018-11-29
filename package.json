@@ -4,7 +4,7 @@
   "description": "JavaScript library for easily interacting with web3 technologies",
   "main": "dist/node/index.js",
   "browser": {
-    "./dist/node/index.js": "./dist/browser/browser.js"
+    "./dist/node/index.js": "./dist/browser/index.js"
   },
   "browserslist": [
     "last 1 version",
