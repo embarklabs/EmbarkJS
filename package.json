@@ -21,6 +21,9 @@
     "babel:browser": "cross-env BABEL_ENV=browser babel --out-dir dist/browser src",
     "babel:node": "cross-env BABEL_ENV=node babel --out-dir dist src",
     "babel:node:async": "cross-env BABEL_ENV=node:async babel --out-dir dist src/node",
+    "babel:watch": "npm-run-all -p babel:watch:*",
+    "babel:watch:browser": "npm run babel:browser -- --verbose --watch",
+    "babel:watch:node": "npm run babel:node -- --verbose --watch",
     "build": "npm run clean && npm run babel && npm run webpack",
     "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
     "http-server": "http-server",
@@ -60,6 +63,7 @@
     "ajv": "6.5.2",
     "cross-env": "5.2.0",
     "http-server": "0.11.1",
+    "npm-run-all": "4.1.5",
     "rimraf": "2.6.2",
     "webpack": "4.16.1",
     "webpack-cli": "3.0.8"
