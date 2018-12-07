@@ -106,7 +106,7 @@ Blockchain.enableEthereum = function() {
 
 Blockchain.execWhenReady = function(cb) {
   if (this.done) {
-    return cb(this.err);
+    return cb(this.err, this.web3);
   }
   if (!this.list) {
     this.list = [];
@@ -120,7 +120,7 @@ Blockchain.doFirst = function(todo) {
     self.done = true;
     self.err = err;
     if (self.list) {
-      self.list.map((x) => x.apply(x, [self.err]));
+      self.list.map((x) => x.apply(x, [self.err, self.web3]));
     }
   })
 };
@@ -153,7 +153,7 @@ let Contract = function (options) {
 
     let originalMethods = Object.keys(ContractClass);
 
-    Blockchain.execWhenReady(function() {
+    Blockchain.execWhenReady(function(err, web3) {
       if(!ContractClass.currentProvider){
         ContractClass.setProvider(web3.currentProvider);
       }
