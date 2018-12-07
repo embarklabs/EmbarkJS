@@ -1,42 +1,48 @@
-import {reduce} from './async'
+/*global ethereum*/
+import {reduce} from './async';
 
 let Blockchain = {};
 let contracts = [];
 
-function isNewWeb3_1() {
-  return (typeof(web3.version) === "string");
-}
+Blockchain.Providers = {};
 
-function getAccounts(cb) {
-  if (isNewWeb3_1()) {
-    return web3.eth.getAccounts().then(function(accounts) {
-      return cb(null, accounts);
-    }).catch(function(err) {
-      return cb(err);
-    });
+Blockchain.registerProvider = function(providerName, obj) {
+  this.Providers[providerName] = obj;
+};
+
+Blockchain.setProvider = function(providerName, options) {
+  let provider = this.Providers[providerName];
+
+  if (!provider) {
+    throw new Error('Unknown blockchain provider. ' +
+      'Make sure to register it first using EmbarkJS.Blockchain.registerProvider(providerName, providerObject');
   }
-  web3.eth.getAccounts(cb);
-}
+
+  this.currentProviderName = providerName;
+  this.blockchainConnector = provider;
+
+  provider.init(options);
+};
 
 Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
 
   const checkConnect = (next) => {
-    getAccounts(function(err, a) {
+    this.blockchainConnector.getAccounts((err, _a) => {
       if (err) {
-        web3.setProvider(null);
+        this.blockchainConnector.setProvider(null);
       }
-      return next(null, !err)
+      return next(null, !err);
     });
-  }
+  };
 
   const connectWeb3 = async (next) => {
     if (window.ethereum) {
       try {
         if (Blockchain.autoEnable) {
           await ethereum.enable();
+          this.blockchainConnector.setProvider(ethereum);
         }
-        web3.setProvider(ethereum);
         return checkConnect(next);
       } catch (error) {
         return next(null, false);
@@ -44,17 +50,17 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
     }
 
     return next(null, false);
-  }
+  };
 
   const connectWebsocket = (value, next) => {
-    web3.setProvider(new Web3.providers.WebsocketProvider(value));
+    this.blockchainConnector.setProvider(this.blockchainConnector.getNewProvider('WebsocketProvider', value));
     checkConnect(next);
-  }
+  };
 
   const connectHttp = (value, next) => {
-    web3.setProvider(new Web3.providers.HttpProvider(value));
+    this.blockchainConnector.setProvider(this.blockchainConnector.getNewProvider('HttpProvider', value));
     checkConnect(next);
-  }
+  };
 
   this.doFirst(function(cb) {
     reduce(connectionList, false, function(connected, value, next) {
@@ -62,43 +68,39 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         return next(null, connected);
       }
 
-      if (typeof Web3 === 'undefined' || typeof web3 === 'undefined') {
-        return next(null, false);
-      }
-
       if (value === '$WEB3') {
         connectWeb3(next);
       } else if (value.indexOf('ws://') >= 0) {
-        connectWebsocket(value, next)
+        connectWebsocket(value, next);
       } else {
-        connectHttp(value, next)
+        connectHttp(value, next);
       }
-    }, function(err, _connected) {
-      self.web3 = web3;
-      getAccounts(function(err, accounts) {
+    }, function(_err, _connected) {
+      self.blockchainConnector.getAccounts((err, accounts) => {
         if (opts.warnAboutMetamask) {
-          if (web3.eth.currentProvider && web3.eth.currentProvider.isMetaMask) {
+          const currentProv = self.blockchainConnector.getCurrentProvider();
+          if (currentProv && currentProv.isMetaMask) {
             console.warn("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
           }
         }
         if (accounts) {
-          web3.eth.defaultAccount = accounts[0];
+          self.blockchainConnector.setDefaultAccount(accounts[0]);
         }
         cb(err);
         doneCb(err);
       });
     });
-  })
+  });
 };
 
 Blockchain.enableEthereum = function() {
   if (window.ethereum) {
     return ethereum.enable().then((accounts) => {
-      web3.setProvider(ethereum);
-      web3.eth.defaultAccount = accounts[0];
+      this.blockchainConnector.setProvider(ethereum);
+      this.blockchainConnector.setDefaultAccount(accounts[0]);
       contracts.forEach(contract => {
-        contract.options.from = web3.eth.defaultAccount;
-      })
+        contract.options.from = this.blockchainConnector.getDefaultAccount();
+      });
       return accounts;
     });
   }
@@ -111,7 +113,7 @@ Blockchain.execWhenReady = function(cb) {
   if (!this.list) {
     this.list = [];
   }
-  this.list.push(cb)
+  this.list.push(cb);
 };
 
 Blockchain.doFirst = function(todo) {
@@ -122,12 +124,11 @@ Blockchain.doFirst = function(todo) {
     if (self.list) {
       self.list.map((x) => x.apply(x, [self.err, self.web3]));
     }
-  })
+  });
 };
 
-let Contract = function (options) {
+let Contract = function(options) {
   var self = this;
-  var i, abiElement;
   var ContractClass;
 
   this.abi = options.abi;
@@ -136,185 +137,72 @@ let Contract = function (options) {
   this.code = '0x' + options.code;
 
   this.web3 = options.web3;
+  this.blockchainConnector = Blockchain.blockchainConnector;
 
-  Contract.checkWeb3.call(this);
-
-  if (Contract.isNewWeb3(this.web3)) {
-    ContractClass = new this.web3.eth.Contract(this.abi, this.address);
-    contracts.push(ContractClass);
-    ContractClass.options.data = this.code;
-    const from = this.from || this.web3.eth.defaultAccount
-    if (from) {
-      ContractClass.options.from = from
-    }
-    ContractClass.abi = ContractClass.options.abi;
-    ContractClass.address = this.address;
-    ContractClass.gas = this.gas;
-
-    let originalMethods = Object.keys(ContractClass);
-
-    Blockchain.execWhenReady(function(err, web3) {
-      if(!ContractClass.currentProvider){
-        ContractClass.setProvider(web3.currentProvider);
-      }
-      if (web3.eth.defaultAccount) {
-        ContractClass.options.from = web3.eth.defaultAccount;
-      }
-    });
-
-    ContractClass._jsonInterface.forEach((abi) => {
-      if (originalMethods.indexOf(abi.name) >= 0) {
-        console.log(abi.name + " is a reserved word and cannot be used as a contract method, property or event");
-        return;
-      }
-
-      if (!abi.inputs) {
-        return;
-      }
-
-      let numExpectedInputs = abi.inputs.length;
-
-      if (abi.type === 'function' && abi.constant) {
-        ContractClass[abi.name] = function () {
-          let options = {}, cb = null, args = Array.from(arguments || []).slice(0, numExpectedInputs);
-          if (typeof (arguments[numExpectedInputs]) === 'function') {
-            cb = arguments[numExpectedInputs];
-          } else if (typeof (arguments[numExpectedInputs]) === 'object') {
-            options = arguments[numExpectedInputs];
-            cb = arguments[numExpectedInputs + 1];
-          }
-
-          let ref = ContractClass.methods[abi.name];
-          let call = ref.apply(ref, ...arguments).call;
-          return call.apply(call, []);
-        };
-      } else if (abi.type === 'function') {
-        ContractClass[abi.name] = function () {
-          let options = {}, cb = null, args = Array.from(arguments || []).slice(0, numExpectedInputs);
-          if (typeof (arguments[numExpectedInputs]) === 'function') {
-            cb = arguments[numExpectedInputs];
-          } else if (typeof (arguments[numExpectedInputs]) === 'object') {
-            options = arguments[numExpectedInputs];
-            cb = arguments[numExpectedInputs + 1];
-          }
-
-          let ref = ContractClass.methods[abi.name];
-          let send = ref.apply(ref, args).send;
-          return send.apply(send, [options, cb]);
-        };
-      } else if (abi.type === 'event') {
-        ContractClass[abi.name] = function (options, cb) {
-          let ref = ContractClass.events[abi.name];
-          return ref.apply(ref, [options, cb]);
-        };
-      }
-    });
-
-    return ContractClass;
-  } else {
-    ContractClass = this.web3.eth.contract(this.abi);
-
-    this.eventList = [];
-
-    if (this.abi) {
-      for (i = 0; i < this.abi.length; i++) {
-        abiElement = this.abi[i];
-        if (abiElement.type === 'event') {
-          this.eventList.push(abiElement.name);
-        }
-      }
-    }
-
-    var messageEvents = function () {
-      this.cb = function () {
-      };
-    };
-
-    messageEvents.prototype.then = function (cb) {
-      this.cb = cb;
-    };
-
-    messageEvents.prototype.error = function (err) {
-      return err;
-    };
-
-    this._originalContractObject = ContractClass.at(this.address);
-    this._methods = Object.getOwnPropertyNames(this._originalContractObject).filter(function (p) {
-      // TODO: check for forbidden properties
-      if (self.eventList.indexOf(p) >= 0) {
-
-        self[p] = function () {
-          var promise = new messageEvents();
-          var args = Array.prototype.slice.call(arguments);
-          args.push(function (err, result) {
-            if (err) {
-              promise.error(err);
-            } else {
-              promise.cb(result);
-            }
-          });
-
-          self._originalContractObject[p].apply(self._originalContractObject[p], args);
-          return promise;
-        };
-        return true;
-      } else if (typeof self._originalContractObject[p] === 'function') {
-        self[p] = function (_args) {
-          var args = Array.prototype.slice.call(arguments);
-          var fn = self._originalContractObject[p];
-          var props = self.abi.find((x) => x.name == p);
-
-          var promise = new Promise(function (resolve, reject) {
-            args.push(function (err, transaction) {
-              promise.tx = transaction;
-              if (err) {
-                return reject(err);
-              }
-
-              var getConfirmation = function () {
-                self.web3.eth.getTransactionReceipt(transaction, function (err, receipt) {
-                  if (err) {
-                    return reject(err);
-                  }
-
-                  if (receipt !== null) {
-                    return resolve(receipt);
-                  }
-
-                  setTimeout(getConfirmation, 1000);
-                });
-              };
-
-              if (typeof transaction !== "string" || props.constant) {
-                resolve(transaction);
-              } else {
-                getConfirmation();
-              }
-            });
-
-            fn.apply(fn, args);
-          });
-
-          return promise;
-        };
-        return true;
-      }
-      return false;
-    });
+  ContractClass = this.blockchainConnector.newContract({abi: this.abi, address: this.address});
+  contracts.push(ContractClass);
+  ContractClass.options.data = this.code;
+  const from = this.from || self.blockchainConnector.getDefaultAccount() || this.web3.eth.defaultAccount;
+  if (from) {
+    ContractClass.options.from = from;
   }
-};
+  ContractClass.abi = ContractClass.options.abi;
+  ContractClass.address = this.address;
+  ContractClass.gas = this.gas;
 
-Contract.checkWeb3 = function () {};
+  let originalMethods = Object.keys(ContractClass);
 
-Contract.isNewWeb3 = function (web3Obj) {
-    var _web3 = web3Obj || (new Web3());
-    if (typeof(_web3.version) === "string") {
-        return true;
+  Blockchain.execWhenReady(function(_err, _web3) {
+    if (!ContractClass.currentProvider) {
+      ContractClass.setProvider(self.blockchainConnector.getCurrentProvider() || self.web3.currentProvider);
     }
-    return parseInt(_web3.version.api.split('.')[0], 10) >= 1;
+    ContractClass.options.from = self.blockchainConnector.getDefaultAccount() ||self.web3.eth.defaultAccount;
+  });
+
+  ContractClass._jsonInterface.forEach((abi) => {
+    if (originalMethods.indexOf(abi.name) >= 0) {
+      console.log(abi.name + " is a reserved word and cannot be used as a contract method, property or event");
+      return;
+    }
+
+    if (!abi.inputs) {
+      return;
+    }
+
+    let numExpectedInputs = abi.inputs.length;
+
+    if (abi.type === 'function' && abi.constant) {
+      ContractClass[abi.name] = function() {
+        let ref = ContractClass.methods[abi.name];
+        let call = ref.apply(ref, ...arguments).call;
+        return call.apply(call, []);
+      };
+    } else if (abi.type === 'function') {
+      ContractClass[abi.name] = function() {
+        let options = {}, cb = null, args = Array.from(arguments || []).slice(0, numExpectedInputs);
+        if (typeof (arguments[numExpectedInputs]) === 'function') {
+          cb = arguments[numExpectedInputs];
+        } else if (typeof (arguments[numExpectedInputs]) === 'object') {
+          options = arguments[numExpectedInputs];
+          cb = arguments[numExpectedInputs + 1];
+        }
+
+        let ref = ContractClass.methods[abi.name];
+        let send = ref.apply(ref, args).send;
+        return send.apply(send, [options, cb]);
+      };
+    } else if (abi.type === 'event') {
+      ContractClass[abi.name] = function(options, cb) {
+        let ref = ContractClass.events[abi.name];
+        return ref.apply(ref, [options, cb]);
+      };
+    }
+  });
+
+  return ContractClass;
 };
 
-Contract.prototype.deploy = function (args, _options) {
+Contract.prototype.deploy = function(args, _options) {
   var self = this;
   var contractParams;
   var options = _options || {};
@@ -322,15 +210,16 @@ Contract.prototype.deploy = function (args, _options) {
   contractParams = args || [];
 
   contractParams.push({
-    from: this.web3.eth.accounts[0],
+    from: this.blockchainConnector.getDefaultAccount() || this.web3.eth.accounts[0],
     data: this.code,
     gas: options.gas || 800000
   });
 
-  var contractObject = this.web3.eth.contract(this.abi);
 
-  var promise = new Promise(function (resolve, reject) {
-    contractParams.push(function (err, transaction) {
+  const contractObject = this.blockchainConnector.newContract({abi: this.abi});
+
+  return new Promise(function (resolve, reject) {
+    contractParams.push(function(err, transaction) {
       if (err) {
         reject(err);
       } else if (transaction.address !== undefined) {
@@ -344,30 +233,28 @@ Contract.prototype.deploy = function (args, _options) {
 
     contractObject["new"].apply(contractObject, contractParams);
   });
-
-  return promise;
 };
 
 Contract.prototype.new = Contract.prototype.deploy;
 
-Contract.prototype.at = function (address) {
+Contract.prototype.at = function(address) {
   return new Contract({abi: this.abi, code: this.code, address: address});
 };
 
-Contract.prototype.send = function (value, unit, _options) {
-  var options, wei;
+Contract.prototype.send = function(value, unit, _options) {
+  let options, wei;
   if (typeof unit === 'object') {
     options = unit;
     wei = value;
   } else {
     options = _options || {};
-    wei = this.web3.toWei(value, unit);
+    wei = this.blockchainConnector.toWei(value, unit);
   }
 
   options.to = this.address;
   options.value = wei;
 
-  this.web3.eth.sendTransaction(options);
+  return this.blockchainConnector.send(options);
 };
 
 Blockchain.Contract = Contract;

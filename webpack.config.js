@@ -1,7 +1,7 @@
 const path = require('path');
 
 const standalone = {
-    entry: path.join(__dirname, 'dist/browser', 'browser.js'),
+    entry: path.join(__dirname, 'dist/browser', 'index.js'),
     mode: 'production',
     // optimization: {
     //     minimize: false
@@ -13,7 +13,7 @@ const standalone = {
         libraryTarget: 'umd',
         libraryExport: 'default',
         path: __dirname,
-        umdNamedDefine: true,
+        umdNamedDefine: true
     },
     target: 'web'
 };
