@@ -98,10 +98,10 @@ Storage.setProviders = async function (dappConnOptions) {
         }
       }
     }, function(err, result){
-      if(!result) throw new Error('Could not connect to a storage provider using any of the dappConnections in the storage config');
+      if(!result) console.error('Could not connect to a storage provider using any of the dappConnections in the storage config');
     });
   } catch (err) {
-    throw new Error('Failed to connect to a storage provider: ' + err.message);
+    console.error('Failed to connect to a storage provider: ' + err.message);
   }
 };
 
