@@ -1,6 +1,6 @@
 {
   "name": "embarkjs",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "JavaScript library for easily interacting with web3 technologies",
   "main": "dist/node/index.js",
   "browser": {
