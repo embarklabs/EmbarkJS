@@ -77,11 +77,15 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
       }
     }, function(_err, _connected) {
       self.blockchainConnector.getAccounts((err, accounts) => {
-        if (opts.warnAboutMetamask) {
-          const currentProv = self.blockchainConnector.getCurrentProvider();
-          if (currentProv && currentProv.isMetaMask) {
-            console.warn("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
+        const currentProv = self.blockchainConnector.getCurrentProvider();
+        if (opts.warnAboutMetamask && currentProv && currentProv.isMetaMask) {
+          // if we are using metamask, ask embark to turn on dev_funds
+          // embark will only do this if geth is our client and we are in
+          // dev mode
+          if(opts.blockchainClient === 'geth') {
+            console.warn("%cNote: There is a known issue with Geth that may cause transactions to get stuck when using Metamask. Please log in to the cockpit (http://localhost:8000/embark?enableRegularTxs=true) to enable a workaround. Once logged in, the workaround will automatically be enabled.", "font-size: 2em");  
           }
+          console.warn("%cNote: Embark has detected you are in the development environment and using Metamask, please make sure Metamask is connected to your local node", "font-size: 2em");
         }
         if (accounts) {
           self.blockchainConnector.setDefaultAccount(accounts[0]);
