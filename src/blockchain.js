@@ -1,8 +1,50 @@
 /*global ethereum*/
 import {reduce} from './async';
 
-let Blockchain = {};
+let Blockchain = {
+  list: [],
+  done: false,
+  err: null
+};
 let contracts = [];
+
+Blockchain.connect = function({dappConnection, dappAutoEnable = true, warnAboutMetamask, blockchainClient = ''}, cb = () => {}) {
+  return new Promise((resolve, reject) => {
+    this.whenEnvIsLoaded(() => {
+      this.doFirst((done) => {
+        this.autoEnable = dappAutoEnable;
+        this.doConnect(dappConnection, {
+          warnAboutMetamask: warnAboutMetamask,
+          blockchainClient: blockchainClient
+        }, (err) => {
+          cb(err);
+          done(err);
+          if (err) {
+            return reject(err);
+          }
+          resolve(err);
+        });
+      });
+    });
+  });
+
+};
+
+Blockchain.doFirst = function(todo) {
+  todo((err) => {
+    this.done = true;
+    this.err = err;
+    this.list.map((x) => x.apply(x, [self.err]));
+  });
+};
+
+Blockchain.whenEnvIsLoaded = function(cb) {
+  if (typeof document !== 'undefined' && document !== null && !(/comp|inter|loaded/).test(document.readyState)) {
+    document.addEventListener('DOMContentLoaded', cb);
+  } else {
+    cb();
+  }
+};
 
 Blockchain.Providers = {};
 
@@ -24,7 +66,7 @@ Blockchain.setProvider = function(providerName, options) {
   provider.init(options);
 };
 
-Blockchain.connect = function(connectionList, opts, doneCb) {
+Blockchain.doConnect = function(connectionList, opts, doneCb) {
   const self = this;
 
   const checkConnect = (next) => {
