@@ -28,7 +28,7 @@
     "clean": "rimraf dist embark.min.js embarkjs-*.tgz package",
     "http-server": "http-server",
     "prepare": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --exit",
     "webpack": "webpack"
   },
   "repository": {
@@ -56,15 +56,19 @@
     "async-es": "2.6.1"
   },
   "devDependencies": {
-    "@babel/cli": "7.0.0-rc.1",
-    "@babel/core": "7.0.0-rc.1",
-    "@babel/plugin-transform-runtime": "7.0.0-rc.1",
-    "@babel/preset-env": "7.0.0-rc.1",
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.2.2",
+    "@babel/plugin-transform-runtime": "7.2.0",
+    "@babel/preset-env": "7.2.3",
+    "@babel/register": "7.0.0",
     "ajv": "6.5.2",
+    "chai": "4.2.0",
     "cross-env": "5.2.0",
     "http-server": "0.11.1",
+    "mocha": "5.2.0",
     "npm-run-all": "4.1.5",
     "rimraf": "2.6.2",
+    "web3": "1.0.0-beta.37",
     "webpack": "4.16.1",
     "webpack-cli": "3.0.8"
   },

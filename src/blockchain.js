@@ -28,15 +28,23 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
   const self = this;
 
   const checkConnect = (next) => {
-    this.blockchainConnector.getAccounts((err, _a) => {
-      if (err) {
-        this.blockchainConnector.setProvider(null);
-      }
-      return next(null, !err);
+    this.blockchainConnector.getAccounts((error, _a) => {
+      const provider = self.blockchainConnector.getCurrentProvider();
+      const connectionString = provider.host;
+
+      if (error) this.blockchainConnector.setProvider(null);
+
+      return next(null, {
+        connectionString,
+        error,
+        connected: !error
+      });
     });
   };
 
   const connectWeb3 = async (next) => {
+    const connectionString = 'web3://';
+
     if (window.ethereum) {
       try {
         if (Blockchain.autoEnable) {
@@ -45,11 +53,19 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         }
         return checkConnect(next);
       } catch (error) {
-        return next(null, false);
+        return next(null, {
+          connectionString,
+          error,
+          connected: false
+        });
       }
     }
 
-    return next(null, false);
+    return next(null, {
+      connectionString,
+      error: new Error("web3 provider not detected"),
+      connected: false
+    });
   };
 
   const connectWebsocket = (value, next) => {
@@ -62,20 +78,24 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
     checkConnect(next);
   };
 
+  let connectionErrs = {};
+
   this.doFirst(function(cb) {
-    reduce(connectionList, false, function(connected, value, next) {
-      if (connected) {
-        return next(null, connected);
+    reduce(connectionList, false, function(result, connectionString, next) {
+      if (result.connected) {
+        return next(null, result);
+      } else if(result) {
+        connectionErrs[result.connectionString] = result.error;
       }
 
-      if (value === '$WEB3') {
+      if (connectionString === '$WEB3') {
         connectWeb3(next);
-      } else if (value.indexOf('ws://') >= 0) {
-        connectWebsocket(value, next);
+      } else if (connectionString.indexOf('ws://') >= 0) {
+        connectWebsocket(connectionString, next);
       } else {
-        connectHttp(value, next);
+        connectHttp(connectionString, next);
       }
-    }, function(_err, _connected) {
+    }, function(_err, _connectionErr, _connected) {
       self.blockchainConnector.getAccounts((err, accounts) => {
         const currentProv = self.blockchainConnector.getCurrentProvider();
         if (opts.warnAboutMetamask && currentProv && currentProv.isMetaMask) {
@@ -83,7 +103,7 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
           // embark will only do this if geth is our client and we are in
           // dev mode
           if(opts.blockchainClient === 'geth') {
-            console.warn("%cNote: There is a known issue with Geth that may cause transactions to get stuck when using Metamask. Please log in to the cockpit (http://localhost:8000/embark?enableRegularTxs=true) to enable a workaround. Once logged in, the workaround will automatically be enabled.", "font-size: 2em");  
+            console.warn("%cNote: There is a known issue with Geth that may cause transactions to get stuck when using Metamask. Please log in to the cockpit (http://localhost:8000/embark?enableRegularTxs=true) to enable a workaround. Once logged in, the workaround will automatically be enabled.", "font-size: 2em");
           }
           if(opts.blockchainClient === 'parity') {
             console.warn("%cNote: Parity blocks the connection from browser extensions like Metamask. To resolve this problem, go to https://embark.status.im/docs/blockchain_configuration.html#Using-Parity-and-Metamask", "font-size: 2em");
@@ -93,8 +113,11 @@ Blockchain.connect = function(connectionList, opts, doneCb) {
         if (accounts) {
           self.blockchainConnector.setDefaultAccount(accounts[0]);
         }
-        cb(err);
-        doneCb(err);
+
+        const connectionError = new BlockchainConnectionError(connectionErrs);
+
+        cb(connectionErrs);
+        doneCb(connectionErrs);
       });
     });
   });
@@ -265,5 +288,14 @@ Contract.prototype.send = function(value, unit, _options) {
 };
 
 Blockchain.Contract = Contract;
+
+class BlockchainConnectionError extends Error {
+  constructor(connectionErrors) {
+    super("Could not establish a connection to a node.");
+
+    this.connections = connectionErrors;
+    this.name = 'BlockchainConnectionError';
+  }
+}
 
 export default Blockchain;
