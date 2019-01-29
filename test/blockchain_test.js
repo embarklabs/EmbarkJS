@@ -41,8 +41,8 @@ describe('Blockchain', () => {
             (cb) => startRPCMockServer({successful: validServer}, cb)
           ),
           (_err, servers) => {
-            const connStrings = servers.map(server => server.connectionString);
-            Blockchain.default.connect(connStrings, {}, err => {
+            const dappConnection = servers.map(server => server.connectionString);
+            Blockchain.default.connect({dappConnection}, err => {
               if(scenario.error) assert(err);
 
               servers.forEach((server, idx) => {

@@ -137,8 +137,18 @@ Blockchain.doConnect = function(connectionList, opts, doneCb) {
       } else {
         connectHttp(connectionString, next);
       }
-    }, function(_err, _connectionErr, _connected) {
+    }, function(_err, result) {
+      if (!result.connected || result.error) {
+        const connectionError = new BlockchainConnectionError(connectionErrs);
+        cb(connectionError);
+        return doneCb(connectionError);
+      }
+
       self.blockchainConnector.getAccounts((err, accounts) => {
+        if (err) {
+          cb(err);
+          return doneCb(err);
+        }
         const currentProv = self.blockchainConnector.getCurrentProvider();
         if (opts.warnAboutMetamask && currentProv && currentProv.isMetaMask) {
           // if we are using metamask, ask embark to turn on dev_funds
@@ -156,10 +166,8 @@ Blockchain.doConnect = function(connectionList, opts, doneCb) {
           self.blockchainConnector.setDefaultAccount(accounts[0]);
         }
 
-        const connectionError = new BlockchainConnectionError(connectionErrs);
-
-        cb(connectionErrs);
-        doneCb(connectionErrs);
+        cb();
+        doneCb();
       });
     });
   });
