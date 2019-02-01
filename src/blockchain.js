@@ -91,8 +91,8 @@ Blockchain.doConnect = function(connectionList, opts, doneCb) {
       try {
         if (Blockchain.autoEnable) {
           await ethereum.enable();
-          this.blockchainConnector.setProvider(ethereum);
         }
+        this.blockchainConnector.setProvider(ethereum);
         return checkConnect(next);
       } catch (error) {
         return next(null, {
